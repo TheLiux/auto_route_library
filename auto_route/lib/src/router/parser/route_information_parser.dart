@@ -1,8 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart'
-    show RouteInformation, RouteInformationParser;
+import 'package:flutter/widgets.dart' show RouteInformation, RouteInformationParser;
 import 'package:path/path.dart' as p;
 
 import '../../matcher/route_matcher.dart';
@@ -16,8 +15,7 @@ class DefaultRouteParser extends RouteInformationParser<UrlState> {
   @override
   Future<UrlState> parseRouteInformation(RouteInformation routeInformation) {
     final uri = Uri.parse(routeInformation.location ?? '');
-    var matches =
-        _matcher.matchUri(uri, includePrefixMatches: includePrefixMatches);
+    var matches = _matcher.matchUri(uri, includePrefixMatches: includePrefixMatches);
     return SynchronousFuture<UrlState>(UrlState(uri, matches ?? const []));
   }
 
@@ -101,9 +99,7 @@ class UrlState {
   }
 
   List<RouteMatch> childrenOfSegmentNamed(String routeName) {
-    return _findSegment(segments, (match) => match.name == routeName)
-            ?.children ??
-        const [];
+    return _findSegment(segments, (match) => match.name == routeName)?.children ?? const [];
   }
 
   static Uri _buildUri(List<RouteMatch> routes) {
@@ -122,9 +118,9 @@ class UrlState {
     if (lastSegment.queryParams.isNotEmpty) {
       var queries = lastSegment.queryParams.rawMap;
       for (var key in queries.keys) {
-        var value = queries[key]?.toString() ?? '';
-        if (value.isNotEmpty) {
-          queryParams[key] = value.toString();
+        var value = _normalizeQueryParamValue(queries[key]);
+        if (value != null) {
+          queryParams[key] = value;
         }
       }
     }
@@ -142,10 +138,7 @@ class UrlState {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UrlState &&
-          runtimeType == other.runtimeType &&
-          const ListEquality().equals(segments, other.segments);
+      identical(this, other) || other is UrlState && runtimeType == other.runtimeType && const ListEquality().equals(segments, other.segments);
 
   @override
   int get hashCode => const ListEquality().hash(segments);
@@ -161,4 +154,24 @@ class UrlState {
       shouldReplace: replace ?? shouldReplace,
     );
   }
+}
+
+dynamic _normalizeQueryParamValue(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+
+  if (value is Iterable) {
+    return value.map((el) => el?.toString()).toList();
+  }
+
+  if (value is! String) {
+    value = value.toString();
+  }
+
+  if (value.isEmpty) {
+    return null;
+  }
+
+  return value;
 }
