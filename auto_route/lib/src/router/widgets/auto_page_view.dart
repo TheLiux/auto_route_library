@@ -9,12 +9,16 @@ class AutoPageView extends StatefulWidget {
     required this.controller,
     this.physics,
     required this.router,
+    this.animatePageTransition = true,
+    this.duration = const Duration(milliseconds: 300),
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrollDirection = Axis.horizontal,
   }) : super(key: key);
 
+  final bool animatePageTransition;
   final PageController controller;
   final Axis scrollDirection;
+  final Duration duration;
   final TabsRouter router;
 
   /// How the page view should respond to user input.
@@ -83,9 +87,7 @@ class AutoPageViewState extends State<AutoPageView> {
   Future<void> _warpToCurrentIndex() async {
     if (!mounted) return Future<void>.value();
 
-    const Duration duration = Duration(milliseconds: 300);
-
-    if (duration == Duration.zero) {
+    if (widget.duration == Duration.zero) {
       _controller.jumpToPage(_router.activeIndex);
       return Future<void>.value();
     }
@@ -93,7 +95,7 @@ class AutoPageViewState extends State<AutoPageView> {
     if ((_router.activeIndex - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
       await _controller.animateToPage(_router.activeIndex,
-          duration: duration, curve: Curves.ease);
+          duration: widget.duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -112,7 +114,7 @@ class AutoPageViewState extends State<AutoPageView> {
     _controller.jumpToPage(initialPage);
 
     await _controller.animateToPage(_router.activeIndex,
-        duration: duration, curve: Curves.ease);
+        duration: widget.duration, curve: Curves.ease);
     if (!mounted) return Future<void>.value();
     setState(() {
       _warpUnderwayCount -= 1;

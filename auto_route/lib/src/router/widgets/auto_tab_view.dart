@@ -15,16 +15,20 @@ class AutoTabView extends StatefulWidget {
 
   const AutoTabView({
     Key? key,
+    required this.animatePageTransition,
     required this.controller,
-    this.physics,
+    required this.duration,
     required this.router,
     this.scrollDirection = Axis.horizontal,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.physics,
   }) : super(key: key);
-  final Axis scrollDirection;
+  final bool animatePageTransition;
   final TabController controller;
-
+  final Duration duration;
   final TabsRouter router;
+  final Axis scrollDirection;
+  final DragStartBehavior dragStartBehavior;
 
   /// How the page view should respond to user input.
   ///
@@ -38,7 +42,6 @@ class AutoTabView extends StatefulWidget {
   final ScrollPhysics? physics;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
 
   @override
   State<AutoTabView> createState() => AutoTabViewState();
@@ -109,14 +112,11 @@ class AutoTabViewState extends State<AutoTabView> {
 
   Future<void> _warpToCurrentIndex() async {
     if (!mounted) return Future<void>.value();
-
     if (_pageController.page == _currentIndex!.toDouble()) {
       return Future<void>.value();
     }
 
-    final Duration duration = _controller.animationDuration;
-
-    if (duration == Duration.zero) {
+    if (!widget.animatePageTransition || widget.duration == Duration.zero) {
       _pageController.jumpToPage(_currentIndex!);
       return Future<void>.value();
     }
@@ -126,7 +126,7 @@ class AutoTabViewState extends State<AutoTabView> {
     if ((_currentIndex! - previousIndex).abs() == 1) {
       _warpUnderwayCount += 1;
       await _pageController.animateToPage(_currentIndex!,
-          duration: duration, curve: Curves.ease);
+          duration: widget.duration, curve: Curves.ease);
       _warpUnderwayCount -= 1;
       return Future<void>.value();
     }
@@ -145,7 +145,7 @@ class AutoTabViewState extends State<AutoTabView> {
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex!,
-        duration: duration, curve: Curves.ease);
+        duration: widget.duration, curve: Curves.ease);
     if (!mounted) return Future<void>.value();
     setState(() {
       _warpUnderwayCount -= 1;

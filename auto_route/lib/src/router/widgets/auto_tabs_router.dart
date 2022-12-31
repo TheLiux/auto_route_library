@@ -66,6 +66,7 @@ abstract class AutoTabsRouter extends StatefulWidget {
     required List<PageRouteInfo> routes,
     AutoTabsTabBarBuilder? builder,
     int homeIndex,
+    bool animatePageTransition,
     Duration? duration,
     Axis scrollDirection,
     Curve curve,
@@ -512,12 +513,14 @@ class _AutoTabsRouterTabBar extends AutoTabsRouter {
   final Curve curve;
   final ScrollPhysics? physics;
   final DragStartBehavior dragStartBehavior;
+  final bool animatePageTransition;
   final Axis scrollDirection;
   const _AutoTabsRouterTabBar({
     Key? key,
     required List<PageRouteInfo> routes,
     this.scrollDirection = Axis.horizontal,
     this.builder,
+    this.animatePageTransition = true,
     int homeIndex = -1,
     this.duration,
     this.curve = Curves.ease,
@@ -606,6 +609,9 @@ class _AutoTabsRouterTabBarState extends _AutoTabsRouterState
           return builder(
             context,
             AutoTabView(
+              animatePageTransition: typedWidget.animatePageTransition,
+              duration:
+                  typedWidget.duration ?? const Duration(milliseconds: 300),
               scrollDirection: typedWidget.scrollDirection,
               physics: typedWidget.physics,
               dragStartBehavior: typedWidget.dragStartBehavior,
